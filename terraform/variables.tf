@@ -1,16 +1,11 @@
 variable "aws_region" {
-  type        = string
-  default     = "ap-south-1"
+  type    = string
+  default = "ap-south-1"
 }
 
 variable "instance_type" {
-  type        = string
-  default     = "t2.micro"
-}
-
-variable "key_name" {
-  description = "EC2 key pair name for SSH"
-  type        = string
+  type    = string
+  default = "t2.micro"
 }
 
 variable "docker_image" {
@@ -19,11 +14,18 @@ variable "docker_image" {
 }
 
 variable "strapi_port" {
-  type        = number
-  default     = 1337
+  type    = number
+  default = 1337
 }
 
-variable "allowed_ssh_cidr" {
+variable "key_name" {
+  description = "EC2 key pair name for SSH (set null to disable)"
   type        = string
-  default     = "0.0.0.0/0"
+  default     = null
+}
+
+
+variable "allowed_ssh_cidr" {
+  type    = string
+  default = "0.0.0.0/0"
 }
