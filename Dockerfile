@@ -3,16 +3,21 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Needed for sharp/sqlite builds
-RUN apk add --no-cache python3 make g++
+# build deps for sharp/sqlite
+RUN apk add --no-cache python3 make g++ vips-dev
 
-# Create Strapi project (non-interactive)
+# create project
 RUN echo "n" | STRAPI_TELEMETRY_DISABLED=true npx --yes create-strapi-app@latest strapi-app --quickstart --no-run --skip-cloud
 
 WORKDIR /app/strapi-app
 
-# Build admin panel
+ENV NODE_ENV=production
+
+# build admin
 RUN npm run build
+
+# remove dev deps
+RUN npm prune --omit=dev
 
 
 # ---------- Stage 2: Runtime ----------
@@ -22,12 +27,12 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# copy built app
-COPY --from=builder /app/strapi-app ./
+# runtime lib for sharp
+RUN apk add --no-cache vips
 
-# install only prod deps
-RUN npm install --omit=dev
+# copy only needed files
+COPY --from=builder /app/strapi-app ./
 
 EXPOSE 1337
 
-CMD ["npm", "run", "start"]
+CMD ["node", "node_modules/@strapi/strapi/bin/strapi.js", "start"]
