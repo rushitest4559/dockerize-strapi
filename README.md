@@ -11,3 +11,7 @@ sudo docker run -d --name strapi_container -p 1337:1337 \
   -e JWT_SECRET="yetAnotherRandomString" \
   strapi-img
 ```
+
+### Build Statistics & Startup
+![Docker Image Size](./screenshots/strapi_cmd.PNG)
+![Strapi Live](./screenshots/strapi_live.PNG)
