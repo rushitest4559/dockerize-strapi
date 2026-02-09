@@ -6,21 +6,20 @@ COPY package.json package-lock.json ./
 RUN npm install --frozen-lockfile
 COPY . .
 RUN npm run build
-# NEW: Remove development dependencies and clean cache
+# Prune here to shrink the node_modules before the copy
 RUN npm prune --omit=dev && npm cache clean --force
 
 # ---------- Stage 2: Runtime ----------
 FROM node:20-alpine
-# Use vips (runtime) instead of vips-dev (header files) if possible
-RUN apk add --no-cache vips 
+# Runtime dependencies
+RUN apk add --no-cache vips
 WORKDIR /opt/app
 
-# COPY ONLY WHAT IS NEEDED
-COPY --from=build /opt/app/node_modules ./node_modules
-COPY --from=build /opt/app/dist ./dist
-COPY --from=build /opt/app/package.json ./package.json
-COPY --from=build /opt/app/public ./public
+# Copy EVERYTHING from the build stage 
+# (It's already pruned, so it's safe and won't fail)
+COPY --from=build /opt/app ./
 
 ENV NODE_ENV=production
 EXPOSE 1337
+# Strapi uses 'npm start' to run the production build
 CMD ["npm", "start"]
