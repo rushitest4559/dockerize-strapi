@@ -1,5 +1,5 @@
 # ---------- Stage 1: Build ----------
-FROM node:18-alpine AS build
+FROM node:20-alpine AS build
 
 # Install build dependencies for native modules (sharp, sqlite3)
 RUN apk add --no-cache build-base gcc autoconf automake libtool vips-dev zlib-dev python3
@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build
 
 # ---------- Stage 2: Runtime ----------
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Install only the runtime library for sharp
 RUN apk add --no-cache vips-dev
