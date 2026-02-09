@@ -1,0 +1,25 @@
+services:
+  strapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: strapi_app
+    restart: always
+    ports:
+      - "1337:1337"
+    volumes:
+      - strapi_data:/opt/app/.tmp
+      - strapi_uploads:/opt/app/public/uploads
+    networks:
+      - strapi_network
+    environment:
+      - NODE_ENV=production
+      - STRAPI_TELEMETRY_DISABLED=true
+
+networks:
+  strapi_network:
+    driver: bridge
+
+volumes:
+  strapi_data:
+  strapi_uploads:
