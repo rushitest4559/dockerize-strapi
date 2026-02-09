@@ -1,35 +1,33 @@
-# ---------- BUILD ----------
-FROM node:20-slim AS build
+# ---------- Stage 1: Build ----------
+FROM node:20-alpine AS builder
 
-ENV CI=true
-ENV STRAPI_TELEMETRY_DISABLED=true
+WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    build-essential python3 make g++ libvips-dev git \
-    && rm -rf /var/lib/apt/lists/*
+# Needed for sharp/sqlite builds
+RUN apk add --no-cache python3 make g++
 
-WORKDIR /opt
+# Create Strapi project (non-interactive)
+RUN echo "n" | STRAPI_TELEMETRY_DISABLED=true npx --yes create-strapi-app@latest strapi-app --quickstart --no-run --skip-cloud
 
-# 👇 simulate answering CLI prompts ("n")
-RUN printf "n\n" | npx --yes create-strapi-app@latest app \
-    --quickstart \
-    --no-run \
-    --skip-cloud
+WORKDIR /app/strapi-app
 
-WORKDIR /opt/app
-RUN npm install
+# Build admin panel
 RUN npm run build
 
-# ---------- RUNTIME ----------
-FROM node:20-slim
 
-RUN apt-get update && apt-get install -y libvips \
-    && rm -rf /var/lib/apt/lists/*
+# ---------- Stage 2: Runtime ----------
+FROM node:20-alpine
 
-WORKDIR /opt/app
-COPY --from=build /opt/app ./
+WORKDIR /app
 
 ENV NODE_ENV=production
+
+# copy built app
+COPY --from=builder /app/strapi-app ./
+
+# install only prod deps
+RUN npm install --omit=dev
+
 EXPOSE 1337
 
-CMD ["npm","run","start"]
+CMD ["npm", "run", "start"]
