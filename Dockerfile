@@ -10,14 +10,14 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /opt
 
-RUN npx create-strapi-app@latest app \
+# 👇 simulate answering CLI prompts ("n")
+RUN printf "n\n" | npx --yes create-strapi-app@latest app \
+    --quickstart \
     --no-run \
-    --skip-cloud \
-    --dbclient=sqlite \
-    --dbfile=.tmp/data.db \
-    --install
+    --skip-cloud
 
 WORKDIR /opt/app
+RUN npm install
 RUN npm run build
 
 # ---------- RUNTIME ----------
