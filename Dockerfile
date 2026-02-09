@@ -1,30 +1,36 @@
-# STAGE 1: Build
+# ---------- STAGE 1: BUILD ----------
 FROM node:20-slim AS build
 
+ENV CI=true
+ENV STRAPI_TELEMETRY_DISABLED=true
+
 RUN apt-get update && apt-get install -y \
-    build-essential gcc make python3 libvips-dev \
+    build-essential gcc make python3 libvips-dev git \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt
+
+# Create Strapi app inside folder (important ⚠️)
+RUN npx --yes create-strapi-app@latest app \
+    --quickstart --skip-cloud --no-run
+
+WORKDIR /opt/app
+
+# Ensure deps + build
+RUN npm install
+RUN npm run build
+
+# ---------- STAGE 2: RUNTIME ----------
+FROM node:20-slim
+
+RUN apt-get update && apt-get install -y libvips \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/app
 
-# Create app (Scaffolding runs install automatically)
-RUN STRAPI_TELEMETRY_DISABLED=true npx --yes create-strapi-app@latest . \
-    --quickstart --no-run --skip-cloud
-
-# Explicit install to ensure all dependencies are ready for build
-RUN npm install
-RUN NODE_ENV=production npm run build
-
-# STAGE 2: Runtime
-FROM node:20-slim
-RUN apt-get update && apt-get install -y libvips && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /opt/app
-
-# Copy the fully built app
 COPY --from=build /opt/app ./
 
 ENV NODE_ENV=production
 EXPOSE 1337
 
-CMD ["npm", "run", "start"]
+CMD ["npm","run","start"]

@@ -4,22 +4,26 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: strapi_app
-    restart: always
+    restart: unless-stopped
     ports:
       - "1337:1337"
+    environment:
+      NODE_ENV: production
+      STRAPI_TELEMETRY_DISABLED: "true"
+      APP_KEYS: "appKey1,appKey2,appKey3,appKey4"
+      API_TOKEN_SALT: "randomSalt123"
+      ADMIN_JWT_SECRET: "adminSecret123"
+      JWT_SECRET: "jwtSecret123"
     volumes:
-      - strapi_data:/opt/app/.tmp
-      - strapi_uploads:/opt/app/public/uploads
+      - strapi_public:/opt/app/public
+      - strapi_db:/opt/app/.tmp
     networks:
       - strapi_network
-    environment:
-      - NODE_ENV=production
-      - STRAPI_TELEMETRY_DISABLED=true
 
 networks:
   strapi_network:
     driver: bridge
 
 volumes:
-  strapi_data:
-  strapi_uploads:
+  strapi_public:
+  strapi_db:
