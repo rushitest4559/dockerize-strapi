@@ -8,4 +8,4 @@
 
 ## Screenshots
 ![Docker PS](./images/strapi_cmd.PNG)
-![Strapi Running](./images/strapi.PNG)
+![Strapi Running](./images/strapi_web.PNG)
