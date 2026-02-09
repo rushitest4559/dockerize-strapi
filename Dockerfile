@@ -1,9 +1,8 @@
-# ---------- STAGE 1: BUILD ----------
+# ---------- BUILD ----------
 FROM node:20-slim AS build
 
 ENV CI=true
 ENV STRAPI_TELEMETRY_DISABLED=true
-ENV NODE_ENV=development
 
 RUN apt-get update && apt-get install -y \
     build-essential python3 make g++ libvips-dev git \
@@ -11,20 +10,17 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /opt
 
-# Create project (NON-interactive + NO quickstart)
 RUN npx create-strapi-app@latest app \
     --no-run \
     --skip-cloud \
     --dbclient=sqlite \
     --dbfile=.tmp/data.db \
-    --typescript=false \
     --install
 
 WORKDIR /opt/app
-
 RUN npm run build
 
-# ---------- STAGE 2: RUNTIME ----------
+# ---------- RUNTIME ----------
 FROM node:20-slim
 
 RUN apt-get update && apt-get install -y libvips \
