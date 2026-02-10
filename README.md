@@ -3,6 +3,7 @@
 ![img2](./screenshots/img2.PNG)
 ![img3](./screenshots/img3.PNG)
 ![img4](./screenshots/img4.PNG)
+![img5](./screenshots/img5.PNG)
 
 ```bash
 docker network create strapi-net && docker volume create postgres_data
