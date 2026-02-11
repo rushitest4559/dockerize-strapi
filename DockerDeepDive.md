@@ -1726,6 +1726,8 @@ docker system df -v
 
 **Key Takeaway**: **Named volumes solve 95% of persistence needs**. Use bind mounts only for development workflows requiring live code synchronization.
 
+<a name="docker-compose"></a>
+
 # 🐙 **Docker Compose: Multi-Container Orchestration Guide** {:#docker-compose}
 
 This document provides comprehensive coverage of Docker Compose for defining and managing multi-container Docker applications using YAML configuration files.
