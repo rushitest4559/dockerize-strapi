@@ -7,7 +7,7 @@
 ![strapi_instance_aws](./imgs/strapi_instance_aws.PNG)
 ![nginx](./imgs/nginx.PNG)
 
-![user data](./strapi-infra/terraform/user_data.sh)
+[user data](./infra/terraform/user_data.sh)
 
 # Steps
 
