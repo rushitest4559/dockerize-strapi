@@ -12,8 +12,8 @@
 # Steps
 
 ```bash
-cd strapi-infra/terraform
+cd infra/terraform
 terraform apply --auto-approve
 ```
 
-## Copy paste this command boom! 3 containers start in your instance which is in private subnet. Enter the website_url in browser.
+## Copy paste this command & boom! 3 containers start in your instance which is in private subnet. Enter the website_url in browser.
