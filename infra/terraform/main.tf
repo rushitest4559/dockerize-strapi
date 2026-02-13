@@ -15,7 +15,14 @@ module "networking" {
   az_2                 = var.az_2
 }
 
-# 3. Security Groups (ALB and Instance)
+# 3. IAM Role & Instance Profile for ECR Access
+# This module creates the role and the profile needed for ECR login
+# module "iam" {
+#   source = "../modules/ecr_role"
+#   name   = var.name
+# }
+
+# 4. Security Groups (ALB and Instance)
 module "security_group" {
   source   = "../modules/security-group"
   name     = var.name
@@ -23,27 +30,29 @@ module "security_group" {
   ssh_cidr = var.ssh_cidr
 }
 
-# 4. SSH Key Pair
+# 5. SSH Key Pair
 module "keypair" {
   source   = "../modules/keypair"
   key_name = var.key_name
   ssh_dir  = var.ssh_dir
 }
 
-# 5. Private EC2 Instance
+# 6. Private EC2 Instance
+# Now includes iam_instance_profile to allow 'aws ecr get-login-password' to work
 module "ec2" {
-  source            = "../modules/ec2"
-  name              = var.name
-  ami_id            = module.ami.ami_id
-  instance_type     = var.instance_type
-  subnet_id         = module.networking.private_subnet_id
-  public_subnet_id  = module.networking.public_subnet_ids[0]
-  security_group_id = module.security_group.instance_sg_id
-  key_name          = module.keypair.key_name
-  user_data         = file("${path.module}/user_data.sh")
+  source               = "../modules/ec2"
+  name                 = var.name
+  ami_id               = module.ami.ami_id
+  instance_type        = var.instance_type
+  subnet_id            = module.networking.private_subnet_id
+  public_subnet_id     = module.networking.public_subnet_ids[0]
+  security_group_id    = module.security_group.instance_sg_id
+  key_name             = module.keypair.key_name
+  user_data            = file("${path.module}/user_data.sh")
+  # iam_instance_profile = module.iam.instance_profile_name
 }
 
-# 6. Application Load Balancer
+# 7. Application Load Balancer
 module "lb" {
   source              = "../modules/load-balancer"
   name                = var.name

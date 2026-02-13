@@ -39,3 +39,9 @@ variable "public_subnet_id" {
   description = "The ID of the public subnet for the bastion host"
   type        = string
 }
+
+# variable "iam_instance_profile" {
+#   description = "The name of the IAM instance profile to attach to the private EC2"
+#   type        = string
+#   default     = null
+# }

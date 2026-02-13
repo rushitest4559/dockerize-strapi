@@ -4,6 +4,8 @@ resource "aws_instance" "this" {
   subnet_id     = var.subnet_id # Should be the private subnet ID
   key_name      = var.key_name
 
+  # iam_instance_profile = var.iam_instance_profile
+
   # Changed to false for private subnet security
   associate_public_ip_address = false 
 

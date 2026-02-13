@@ -5,7 +5,7 @@ exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "--- Script started at $(date) ---"
 
-# Wait for network connectivity
+# 1. Wait for network connectivity
 echo "Waiting for network..."
 while ! ping -c1 8.8.8.8 >/dev/null 2>&1; do
     echo "Network not ready, waiting..."
@@ -13,61 +13,31 @@ while ! ping -c1 8.8.8.8 >/dev/null 2>&1; do
 done
 echo "Network ready!"
 
-# Disable IPv6 to avoid timeouts
-echo "Disabling IPv6..."
+# 2. Disable IPv6 & Configure apt timeouts
 sysctl -w net.ipv6.conf.all.disable_ipv6=1
 sysctl -w net.ipv6.conf.default.disable_ipv6=1
-
-# Increase apt timeouts
-echo "Configuring apt timeouts..."
 mkdir -p /etc/apt/apt.conf.d
 echo 'Acquire::http::Timeout "120";' > /etc/apt/apt.conf.d/99timeout
-echo 'Acquire::ftp::Timeout "120";' >> /etc/apt/apt.conf.d/99timeout
 
-# Add official Docker repository (more reliable than Ubuntu's docker.io)
-echo "Adding official Docker repository..."
-apt-get update -y || echo "WARN: First apt update failed, retrying after 10s..." && sleep 10 && apt-get update -y
-apt-get install -y ca-certificates curl gnupg lsb-release || { echo "FAILED: Essential packages install failed"; exit 1; }
-
+# 3. Install Docker
+echo "Installing Docker..."
+apt-get update -y
+apt-get install -y ca-certificates curl gnupg lsb-release
 mkdir -p /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg || { echo "FAILED: Docker GPG key failed"; exit 1; }
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+apt-get update -y
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+# 4. Start Docker
+systemctl start docker
+systemctl enable docker
+usermod -aG docker ubuntu
 
-apt-get update -y || { echo "FAILED: Docker repo update failed"; exit 1; }
-
-# Install Docker from official repo
-echo "Installing Docker from official repository..."
-apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin || { echo "FAILED: Docker install failed"; exit 1; }
-
-# Verify installations
-if command -v docker >/dev/null 2>&1; then
-    echo "SUCCESS: Docker installed - $(docker --version)"
-else
-    echo "ERROR: Docker installation failed"
-    exit 1
-fi
-
-if docker compose version >/dev/null 2>&1; then
-    echo "SUCCESS: Docker Compose installed - $(docker-compose --version)"
-else
-    echo "ERROR: Docker Compose installation failed"
-    exit 1
-fi
-
-# Start and enable Docker
-echo "Starting Docker service..."
-systemctl start docker || { echo "FAILED: systemctl start docker failed"; exit 1; }
-systemctl enable docker || echo "WARN: systemctl enable docker failed"
-usermod -aG docker ubuntu || echo "WARN: usermod failed (group may not exist yet)"
-
-# Setup project
-echo "Setting up directories..."
+# 5. Setup project directories & files
 mkdir -p /home/ubuntu/strapi/nginx
-cd /home/ubuntu/strapi || { echo "FAILED: cd failed"; exit 1; }
+cd /home/ubuntu/strapi
 
-echo "Creating Nginx config..."
 cat <<'EOT' > nginx/default.conf
 server {
     listen 80;
@@ -81,7 +51,6 @@ server {
 }
 EOT
 
-echo "Creating docker-compose.yml..."
 cat <<'EOT' > docker-compose.yml
 version: "3.8"
 services:
@@ -99,6 +68,7 @@ services:
       - strapi-net
 
   strapi-app:
+    # UPDATED: Pulling from Docker Hub repository
     image: rushin4559/strapi:latest
     container_name: strapi-app
     restart: unless-stopped
@@ -142,12 +112,12 @@ volumes:
   postgres_data:
 EOT
 
-echo "Setting permissions..."
 chown -R ubuntu:ubuntu /home/ubuntu/strapi
 chown ubuntu:ubuntu "$LOG_FILE"
 
-echo "Launching containers..."
+# 6. Launch containers (Docker Hub public images don't need login)
+echo "Launching containers from Docker Hub..."
 docker compose up -d || { echo "FAILED: docker-compose up failed"; exit 1; }
 
-echo "SUCCESS: All containers launched - $(docker ps --format 'table {{.Names}}')"
+echo "SUCCESS: All containers launched"
 echo "--- Script finished successfully at $(date) ---"
