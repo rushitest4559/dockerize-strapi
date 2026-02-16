@@ -14,6 +14,7 @@ services:
     networks:
       - strapi-net
 
+
   strapi-app:
     build: .
     container_name: strapi-app
