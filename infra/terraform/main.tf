@@ -48,8 +48,9 @@ module "ec2" {
   public_subnet_id  = module.networking.public_subnet_ids[0]
   security_group_id = module.security_group.instance_sg_id
   key_name          = module.keypair.key_name
-  user_data         = file("${path.module}/user_data.sh")
-  image_tag         = var.image_tag
+  user_data = templatefile("${path.module}/user_data.sh", {
+    image_tag = var.image_tag
+  })
   # iam_instance_profile = module.iam.instance_profile_name
 }
 

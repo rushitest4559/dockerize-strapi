@@ -12,9 +12,7 @@ resource "aws_instance" "this" {
   # Use a list for security groups
   vpc_security_group_ids = [var.security_group_id]
 
-  user_data = templatefile("user_data.sh", {
-    image_tag = var.image_tag
-  })
+  user_data                   = var.user_data
   user_data_replace_on_change = true
 
   # Best practice: Add metadata options to require IMDSv2

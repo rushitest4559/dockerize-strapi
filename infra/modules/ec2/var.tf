@@ -39,7 +39,3 @@ variable "public_subnet_id" {
   description = "The ID of the public subnet for the bastion host"
   type        = string
 }
-
-variable "image_tag" {
-  
-}
