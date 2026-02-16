@@ -1,0 +1,27 @@
+name: Terraform Delete
+on: workflow_dispatch
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./infra/terraform
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      # DOWNLOAD the state file we saved earlier
+      - name: Download State
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-state
+          path: ./infra/terraform
+
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform init
+      - run: terraform destroy -auto-approve
