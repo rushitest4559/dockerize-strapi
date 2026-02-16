@@ -40,15 +40,16 @@ module "keypair" {
 # 6. Private EC2 Instance
 # Now includes iam_instance_profile to allow 'aws ecr get-login-password' to work
 module "ec2" {
-  source               = "../modules/ec2"
-  name                 = var.name
-  ami_id               = module.ami.ami_id
-  instance_type        = var.instance_type
-  subnet_id            = module.networking.private_subnet_id
-  public_subnet_id     = module.networking.public_subnet_ids[0]
-  security_group_id    = module.security_group.instance_sg_id
-  key_name             = module.keypair.key_name
-  user_data            = file("${path.module}/user_data.sh")
+  source            = "../modules/ec2"
+  name              = var.name
+  ami_id            = module.ami.ami_id
+  instance_type     = var.instance_type
+  subnet_id         = module.networking.private_subnet_id
+  public_subnet_id  = module.networking.public_subnet_ids[0]
+  security_group_id = module.security_group.instance_sg_id
+  key_name          = module.keypair.key_name
+  user_data         = file("${path.module}/user_data.sh")
+  image_tag         = var.image_tag
   # iam_instance_profile = module.iam.instance_profile_name
 }
 

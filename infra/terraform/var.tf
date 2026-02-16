@@ -10,3 +10,4 @@ variable "key_name" { type = string }
 variable "ssh_dir" { type = string }
 variable "instance_type" { type = string }
 variable "aws_region" { type = string }
+variable "image_tag" {}

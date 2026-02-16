@@ -69,7 +69,7 @@ services:
 
   strapi-app:
     # UPDATED: Pulling from Docker Hub repository
-    image: rushin4559/strapi:latest
+    image: rushin4559/strapi:${image_tag}
     container_name: strapi-app
     restart: unless-stopped
     environment:

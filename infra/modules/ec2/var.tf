@@ -40,8 +40,6 @@ variable "public_subnet_id" {
   type        = string
 }
 
-# variable "iam_instance_profile" {
-#   description = "The name of the IAM instance profile to attach to the private EC2"
-#   type        = string
-#   default     = null
-# }
+variable "image_tag" {
+  
+}
