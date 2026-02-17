@@ -9,12 +9,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
-
     tls = {
       source  = "hashicorp/tls"
       version = "~> 4.0"
     }
-
     local = {
       source  = "hashicorp/local"
       version = "~> 2.4"
@@ -22,18 +20,15 @@ terraform {
   }
 
   ############################################
-  # Remote Backend (Recommended for production)
-  # Commented intentionally for assignment/demo
+  # Remote Backend
   ############################################
-  /*
   backend "s3" {
-    bucket         = "your-terraform-state-bucket"
-    key            = "strapi-ec2/terraform.tfstate"
-    region         = "ap-south-1"
-    encrypt        = true
-    dynamodb_table = "terraform-state-lock"
+    bucket  = "rushikesh-strapi-terraform-state"
+    key     = "strapi/terraform.tfstate"
+    region  = "us-east-1"
+    encrypt = true
+    # DynamoDB is omitted as you are working solo
   }
-  */
 }
 
 ############################################

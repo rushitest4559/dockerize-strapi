@@ -1,34 +1,23 @@
-variable "name" {
-  description = "Common name prefix for all resources"
-  type        = string
-}
-
 variable "vpc_cidr" {
-  description = "The CIDR block for the VPC"
+  description = "CIDR block for the VPC"
   type        = string
+  default     = "10.0.0.0/16"
 }
 
-variable "public_subnet_1_cidr" {
-  description = "CIDR block for the first public subnet"
-  type        = string
+variable "public_subnet_cidrs" {
+  description = "CIDR blocks for the public subnets"
+  type        = list(string)
+  default     = ["10.0.1.0/24", "10.0.2.0/24"]
 }
 
-variable "public_subnet_2_cidr" {
-  description = "CIDR block for the second public subnet"
-  type        = string
+variable "availability_zones" {
+  description = "AZs for the subnets"
+  type        = list(string)
+  default     = ["us-east-1a", "us-east-1b"]
 }
 
-variable "private_subnet_cidr" {
-  description = "CIDR block for the private subnet"
+variable "project_name" {
+  description = "Project name for tagging"
   type        = string
-}
-
-variable "az_1" {
-  description = "First availability zone (e.g., us-east-1a)"
-  type        = string
-}
-
-variable "az_2" {
-  description = "Second availability zone (e.g., us-east-1b)"
-  type        = string
+  default     = "strapi-project"
 }

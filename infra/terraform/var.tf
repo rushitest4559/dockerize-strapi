@@ -1,13 +1,12 @@
-variable "name" { type = string }
-variable "vpc_cidr" { type = string }
-variable "public_subnet_1_cidr" { type = string }
-variable "public_subnet_2_cidr" { type = string }
-variable "private_subnet_cidr" { type = string }
-variable "az_1" { type = string }
-variable "az_2" { type = string }
-variable "ssh_cidr" { type = string }
-variable "key_name" { type = string }
-variable "ssh_dir" { type = string }
-variable "instance_type" { type = string }
-variable "aws_region" { type = string }
-variable "image_tag" {}
+variable "aws_region" {
+  default = "us-east-1"
+}
+
+variable "project_name" {
+  default = "rushikesh-strapi"
+}
+
+variable "ecr_image_url" {
+  description = "The ECR image to deploy"
+  default     = "811738710312.dkr.ecr.us-east-1.amazonaws.com/rushikesh-strapi:latest"
+}

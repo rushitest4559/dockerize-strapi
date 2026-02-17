@@ -1,16 +1,20 @@
-output "website_url" {
-  description = "Access your Strapi app here"
-  value       = "http://${module.lb.alb_dns_name}"
+output "vpc_id" {
+  value = module.networking.vpc_id
 }
 
-output "nat_gateway_ip" {
-  value = module.networking.nat_gw_public_ip
+output "ecs_cluster_name" {
+  value = module.ecs.cluster_name
 }
 
-output "strapi_instance_private_ip" {
-  value = module.ec2.private_ip
+output "ecs_service_name" {
+  value = module.ecs.service_name
 }
 
-output "bashion_public_ip" {
-  value = module.ec2.bashion_public_ip
+# Instruction for the user to find the IP
+output "how_to_access_strapi" {
+  value = "Wait 2 minutes for the container to start, then run this command to get your Public IP:"
+}
+
+output "get_public_ip_command" {
+  value = "aws ecs list-tasks --cluster ${module.ecs.cluster_name} --service-name ${module.ecs.service_name} --query 'taskArns[0]' --output text | xargs aws ecs describe-tasks --cluster ${module.ecs.cluster_name} --tasks | grep -i publicIp"
 }
