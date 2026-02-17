@@ -1,7 +1,6 @@
 # ---------- Stage 1: Build ----------
 FROM node:20-alpine AS build
 RUN apk add --no-cache build-base gcc autoconf automake libtool vips-dev zlib-dev python3
-
 WORKDIR /opt/app
 COPY package.json package-lock.json ./
 RUN npm install --frozen-lockfile
