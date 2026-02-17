@@ -1,34 +1,46 @@
+####################################
+# 1. ECS Security Group (Strapi)
+####################################
 resource "aws_security_group" "ecs_sg" {
   name        = "${var.project_name}-ecs-sg"
-  description = "Allow Strapi and Postgres traffic"
+  description = "Security group for Strapi ECS Fargate"
   vpc_id      = var.vpc_id
 
-  # Inbound: Allow Strapi (Port 1337) from anywhere
-  ingress {
-    from_port   = 1337
-    to_port     = 1337
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  tags = { Name = "${var.project_name}-ecs-sg" }
+}
 
-  # Inbound: Allow Postgres (Port 5432) 
-  # We restrict this to ONLY traffic coming from within this same Security Group
-  ingress {
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    self            = true 
-  }
+# Allow Strapi Port 1337 from Internet
+resource "aws_vpc_security_group_ingress_rule" "strapi_ingress" {
+  security_group_id = aws_security_group.ecs_sg.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 1337
+  to_port           = 1337
+  ip_protocol       = "tcp"
+}
 
-  # Outbound: Allow all traffic (Required for ECR image pull and updates)
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+# Allow All Outbound (Required for ECR and RDS communication)
+resource "aws_vpc_security_group_egress_rule" "ecs_all_outbound" {
+  security_group_id = aws_security_group.ecs_sg.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1" # semantically equivalent to all ports
+}
 
-  tags = {
-    Name = "${var.project_name}-ecs-sg"
-  }
+####################################
+# 2. RDS Security Group (Postgres)
+####################################
+resource "aws_security_group" "rds_sg" {
+  name        = "${var.project_name}-rds-sg"
+  description = "Security group for RDS Postgres"
+  vpc_id      = var.vpc_id
+
+  tags = { Name = "${var.project_name}-rds-sg" }
+}
+
+# Allow Postgres Port 5432 ONLY from ECS Security Group
+resource "aws_vpc_security_group_ingress_rule" "rds_ingress" {
+  security_group_id            = aws_security_group.rds_sg.id
+  referenced_security_group_id = aws_security_group.ecs_sg.id
+  from_port                    = 5432
+  to_port                      = 5432
+  ip_protocol                  = "tcp"
 }

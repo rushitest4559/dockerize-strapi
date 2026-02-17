@@ -1,21 +1,16 @@
-variable "project_name" {
-  type    = string
-  default = "rushikesh-strapi"
+variable "project_name" {}
+variable "ecr_image_url" {}
+variable "db_host" {}
+variable "db_name" {}
+variable "db_username" {}
+variable "db_password" {}
+variable "public_subnet_id" {}
+variable "ecs_sg_id" {}
+variable "key_name" {
+  
 }
-
-variable "vpc_id" {
-  type = string
-}
-
-variable "public_subnet_ids" {
-  type = list(string)
-}
-
-variable "ecs_sg_id" {
-  type = string
-}
-
-variable "ecr_image_url" {
-  description = "Full ECR Image URI"
-  type        = string
+variable "rds_dependency" {
+  description = "RDS dependency"
+  type        = any
+  default     = null
 }

@@ -7,6 +7,11 @@ variable "project_name" {
 }
 
 variable "ecr_image_url" {
-  description = "The ECR image to deploy"
-  default     = "811738710312.dkr.ecr.us-east-1.amazonaws.com/rushikesh-strapi:latest"
+  default = "811738710312.dkr.ecr.us-east-1.amazonaws.com/rushikesh-strapi:latest"
+}
+
+variable "db_password" {
+  description = "The password for the RDS instance"
+  type        = string
+  default     = "strapi_secure_password"
 }
