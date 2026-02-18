@@ -28,6 +28,8 @@ jobs:
         with:
           context: ./app
           push: true
+          platforms: linux/amd64   # IMPORTANT
+          provenance: false        # IMPORTANT
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/rushikesh-strapi:latest
             ${{ steps.login-ecr.outputs.registry }}/rushikesh-strapi:${{ github.sha }}
