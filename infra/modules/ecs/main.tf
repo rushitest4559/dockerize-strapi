@@ -11,13 +11,19 @@ resource "aws_cloudwatch_log_group" "ecs_logs" {
 # 1. ECS Cluster with BOTH Capacity Providers
 resource "aws_ecs_cluster" "main" {
   name = "${var.project_name}-cluster"
+}
 
-  capacity_providers = ["FARGATE", "FARGATE_SPOT"]  # Both providers
+resource "aws_ecs_cluster_capacity_providers" "main" {
+  cluster_name = aws_ecs_cluster.main.name
+
+  capacity_providers = ["FARGATE", "FARGATE_SPOT"]
+
   default_capacity_provider_strategy {
     capacity_provider = "FARGATE"
     weight            = 1
   }
 }
+
 
 # 2. Task Definition (unchanged)
 resource "aws_ecs_task_definition" "strapi" {
@@ -28,7 +34,6 @@ resource "aws_ecs_task_definition" "strapi" {
   memory                   = "1024"
 
   execution_role_arn = var.ecs_execution_role_arn
-  task_role_arn      = var.ecs_task_role_arn
 
   container_definitions = jsonencode([
     {
