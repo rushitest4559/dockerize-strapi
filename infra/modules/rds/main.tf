@@ -30,7 +30,7 @@ resource "aws_db_instance" "strapi_db" {
   multi_az          = false
 
   # COST OPTIMIZED
-  publicly_accessible = false
+  publicly_accessible = true
 
   # 🚨 NO BACKUPS / SNAPSHOTS
   backup_retention_period = 0
