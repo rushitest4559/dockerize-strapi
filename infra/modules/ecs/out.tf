@@ -6,10 +6,18 @@ output "service_name" {
   value = aws_ecs_service.main.name
 }
 
-output "ecs_host_public_ip" {
-  value = aws_instance.ecs_host.public_ip
+# REMOVED: ecs_host_public_ip (no EC2)
+# NEW: Get from ECS service tasks (dynamic)
+output "service_arn" {
+  value = aws_ecs_service.main.id
 }
 
-output "strapi_url" {
-  value = "http://${aws_instance.ecs_host.public_ip}:1337/admin"
+locals {
+  # Helper to get task public IP (use in calling module)
+  task_public_ip_data = data.aws_ecs_task_definition.strapi.arn
+}
+
+# Note: Fargate tasks get dynamic IPs - use ALB for stable URL
+output "strapi_info" {
+  value = "Check ECS Console: ${aws_ecs_service.main.id}"
 }
