@@ -1,8 +1,8 @@
-# 1. ECS Cluster with Capacity Provider (unchanged)
+# 1. ECS Cluster with BOTH Capacity Providers
 resource "aws_ecs_cluster" "main" {
   name = "${var.project_name}-cluster"
 
-  capacity_providers = ["FARGATE"]
+  capacity_providers = ["FARGATE", "FARGATE_SPOT"]  # Both providers
   default_capacity_provider_strategy {
     capacity_provider = "FARGATE"
     weight            = 1
@@ -44,22 +44,27 @@ resource "aws_ecs_task_definition" "strapi" {
   ])
 }
 
-# 3. ECS Service - PUBLIC SUBNETS
+# 3. ECS Service - 50/50 Fargate + Spot
 resource "aws_ecs_service" "main" {
   name                = "${var.project_name}-service"
   cluster             = aws_ecs_cluster.main.id
   task_definition     = aws_ecs_task_definition.strapi.arn
   desired_count       = 1
 
+  # Strategy: 50% Fargate + 50% Spot
   capacity_provider_strategy {
     capacity_provider = "FARGATE"
     weight            = 1
   }
+  capacity_provider_strategy {
+    capacity_provider = "FARGATE_SPOT"
+    weight            = 1
+  }
 
   network_configuration {
-    subnets          = [var.public_subnet_id]     # Changed to public
+    subnets          = [var.public_subnet_id]
     security_groups  = [var.ecs_fargate_sg_id]
-    assign_public_ip = true                       # Required for public subnets
+    assign_public_ip = true
   }
 
   depends_on = [var.rds_dependency]
