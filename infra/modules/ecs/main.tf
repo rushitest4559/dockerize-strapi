@@ -1,60 +1,31 @@
-# 1. ECS Cluster
+# 1. ECS Cluster with Capacity Provider (unchanged)
 resource "aws_ecs_cluster" "main" {
   name = "${var.project_name}-cluster"
-}
 
-# Fetch the fresh amazon linux 2 (ECS optimized AMI)
-data "aws_ami" "ecs_optimized" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["amzn2-ami-ecs-hvm-*-x86_64-ebs"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
+  capacity_providers = ["FARGATE"]
+  default_capacity_provider_strategy {
+    capacity_provider = "FARGATE"
+    weight            = 1
   }
 }
 
-# 2. EC2 Instance 
-resource "aws_instance" "ecs_host" {
-  ami                         = data.aws_ami.ecs_optimized.id # ECS-Optimized AMI
-  instance_type               = "t2.micro"
-  subnet_id                   = var.public_subnet_id
-  vpc_security_group_ids      = [var.ecs_sg_id]
-  associate_public_ip_address = true
-
-  # Team provided: Using the instance-profile to allow ECR image pull
-  iam_instance_profile = "ecsInstanceProfile"
-  # for troubleshooting
-  key_name             = var.key_name
-
-  # Registers this specific EC2 into your ECS Cluster
-  user_data = <<-EOF
-    #!/bin/bash
-    echo ECS_CLUSTER=${aws_ecs_cluster.main.name} >> /etc/ecs/ecs.config
-    EOF
-
-  tags = { Name = "${var.project_name}-ecs-host" }
-}
-
-# 3. Task Definition
+# 2. Task Definition (unchanged)
 resource "aws_ecs_task_definition" "strapi" {
   family                   = var.project_name
-  network_mode             = "bridge"
-  requires_compatibilities = ["EC2"]
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
   cpu                      = "512"
   memory                   = "1024"
 
+  execution_role_arn = var.ecs_execution_role_arn
+  task_role_arn      = var.ecs_task_role_arn
+
   container_definitions = jsonencode([
     {
-      name         = "strapi-container"
-      image        = var.ecr_image_url
-      essential    = true
-      portMappings = [{ containerPort = 1337, hostPort = 1337 }]
+      name  = "strapi-container"
+      image = var.ecr_image_url
+      essential = true
+      portMappings = [{ containerPort = 1337 }]
       environment = [
         { name = "DATABASE_CLIENT", value = "postgres" },
         { name = "DATABASE_HOST", value = var.db_host },
@@ -73,12 +44,23 @@ resource "aws_ecs_task_definition" "strapi" {
   ])
 }
 
-# 4. ECS Service
+# 3. ECS Service - PUBLIC SUBNETS
 resource "aws_ecs_service" "main" {
-  name            = "${var.project_name}-service"
-  cluster         = aws_ecs_cluster.main.id
-  task_definition = aws_ecs_task_definition.strapi.arn
-  desired_count   = 1
-  launch_type     = "EC2"
-  depends_on      = [var.rds_dependency]
+  name                = "${var.project_name}-service"
+  cluster             = aws_ecs_cluster.main.id
+  task_definition     = aws_ecs_task_definition.strapi.arn
+  desired_count       = 1
+
+  capacity_provider_strategy {
+    capacity_provider = "FARGATE"
+    weight            = 1
+  }
+
+  network_configuration {
+    subnets          = [var.public_subnet_id]     # Changed to public
+    security_groups  = [var.ecs_fargate_sg_id]
+    assign_public_ip = true                       # Required for public subnets
+  }
+
+  depends_on = [var.rds_dependency]
 }
