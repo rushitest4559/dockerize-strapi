@@ -24,5 +24,5 @@ variable "db_username" {
 
 variable "db_password" {
   type      = string
-  sensitive = true # Hides the password in console logs
+  sensitive = true
 }
