@@ -1,3 +1,13 @@
+# 0. - CloudWatch Log Group 
+resource "aws_cloudwatch_log_group" "ecs_logs" {
+  name              = "/ecs/${var.project_name}-cluster/${var.project_name}-service"
+  retention_in_days = 7
+
+  tags = {
+    Name = "${var.project_name}-ecs-logs"
+  }
+}
+
 # 1. ECS Cluster with BOTH Capacity Providers
 resource "aws_ecs_cluster" "main" {
   name = "${var.project_name}-cluster"
@@ -40,6 +50,15 @@ resource "aws_ecs_task_definition" "strapi" {
         { name = "TRANSFER_TOKEN_SALT", value = "testTransfer" },
         { name = "JWT_SECRET", value = "anotherTestSecret" }
       ]
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.ecs_logs.name
+          "awslogs-region"        = "us-east-1"
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
     }
   ])
 }
