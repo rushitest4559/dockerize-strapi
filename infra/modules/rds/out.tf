@@ -14,7 +14,7 @@ output "db_port" {
 }
 
 output "db_name" {
-  value       = aws_db_instance.strapi_db.name
+  value       = aws_db_instance.strapi_db.db_name
   description = "Database name"
 }
 
