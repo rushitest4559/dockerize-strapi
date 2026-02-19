@@ -61,7 +61,7 @@ resource "aws_cloudwatch_dashboard" "ecs_metrics" {
   })
 }
 
-# 1. ECS Cluster with BOTH Capacity Providers (unchanged)
+# 1. ECS Cluster - Container Insights enabled
 resource "aws_ecs_cluster" "main" {
   name = "${var.project_name}-cluster"
 
@@ -82,7 +82,7 @@ resource "aws_ecs_cluster_capacity_providers" "main" {
   }
 }
 
-# 2. Task Definition (unchanged + CloudWatch metrics enabled)
+# 2. Task Definition - NO task_role_arn, NO runtime_platform
 resource "aws_ecs_task_definition" "strapi" {
   family                   = var.project_name
   network_mode             = "awsvpc"
@@ -90,12 +90,6 @@ resource "aws_ecs_task_definition" "strapi" {
   cpu                      = "512"
   memory                   = "1024"
   execution_role_arn       = var.ecs_execution_role_arn
-
-  # Enable CloudWatch Container Insights metrics
-  runtime_platform {
-    operating_system_family = "LINUX"
-    cpu_architecture        = "X86_64"
-  }
 
   container_definitions = jsonencode([
     {
@@ -128,21 +122,17 @@ resource "aws_ecs_task_definition" "strapi" {
           "awslogs-stream-prefix" = "ecs"
         }
       }
-
-      # Enable detailed CloudWatch metrics
-      enableCloudWatchLogsMetrics = true
     }
   ])
 }
 
-# 3. ECS Service - 50/50 Fargate + Spot (unchanged)
+# 3. ECS Service - Clean, no problematic attributes
 resource "aws_ecs_service" "main" {
   name            = "${var.project_name}-service"
   cluster         = aws_ecs_cluster.main.id
   task_definition = aws_ecs_task_definition.strapi.arn
   desired_count   = 1
 
-  # Strategy: 50% Fargate + 50% Spot
   capacity_provider_strategy {
     capacity_provider = "FARGATE"
     weight            = 1
@@ -157,9 +147,6 @@ resource "aws_ecs_service" "main" {
     security_groups  = [var.ecs_fargate_sg_id]
     assign_public_ip = true
   }
-
-  # Enable CloudWatch Container Insights
-  enable_execute_command = true
 
   depends_on = [var.rds_dependency]
 }
