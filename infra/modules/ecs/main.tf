@@ -37,11 +37,13 @@ resource "aws_ecs_task_definition" "strapi" {
 
   container_definitions = jsonencode([
     {
-      name  = "strapi-container"
-      image = var.ecr_image_url
-      essential = true
+      name         = "strapi-container"
+      image        = var.ecr_image_url
+      essential    = true
       portMappings = [{ containerPort = 1337 }]
       environment = [
+        { name = "DATABASE_SSL", value = "true" },
+        { name = "DATABASE_SSL_REJECT_UNAUTHORIZED", value = "false" },
         { name = "DATABASE_CLIENT", value = "postgres" },
         { name = "DATABASE_HOST", value = var.db_host },
         { name = "DATABASE_PORT", value = "5432" },
@@ -70,10 +72,10 @@ resource "aws_ecs_task_definition" "strapi" {
 
 # 3. ECS Service - 50/50 Fargate + Spot
 resource "aws_ecs_service" "main" {
-  name                = "${var.project_name}-service"
-  cluster             = aws_ecs_cluster.main.id
-  task_definition     = aws_ecs_task_definition.strapi.arn
-  desired_count       = 1
+  name            = "${var.project_name}-service"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.strapi.arn
+  desired_count   = 1
 
   # Strategy: 50% Fargate + 50% Spot
   capacity_provider_strategy {
