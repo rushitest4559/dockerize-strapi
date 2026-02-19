@@ -44,3 +44,11 @@ resource "aws_vpc_security_group_ingress_rule" "rds_ingress" {
   to_port                      = 5432
   ip_protocol                  = "tcp"
 }
+
+resource "aws_vpc_security_group_ingress_rule" "rds_ingress_v2" {
+  security_group_id = aws_security_group.rds_sg.id
+  cidr_ipv4         = "172.31.0.0/16" # Your VPC CIDR from the screenshot
+  from_port         = 5432
+  to_port           = 5432
+  ip_protocol       = "tcp"
+}
