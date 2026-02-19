@@ -22,7 +22,7 @@ module "ecs" {
   ecr_image_url     = var.ecr_image_url
 
   # RDS Connection Details
-  db_host        = module.rds.db_endpoint
+  db_host        = module.rds.db_address
   db_name        = module.rds.db_name
   db_username    = "strapi"
   db_password    = var.db_password
