@@ -6,7 +6,7 @@ resource "aws_security_group" "ecs_sg" {
   description = "Security group for Strapi ECS Fargate"
   vpc_id      = var.vpc_id
 
-  tags = { Name = "${var.project_name}-ecs-sg" }
+  # tags = { Name = "${var.project_name}-ecs-sg" }
 }
 
 # Allow Strapi Port 1337 from Internet
@@ -33,7 +33,7 @@ resource "aws_security_group" "rds_sg" {
   description = "Security group for RDS Postgres"
   vpc_id      = var.vpc_id
 
-  tags = { Name = "${var.project_name}-rds-sg" }
+  # tags = { Name = "${var.project_name}-rds-sg" }
 }
 
 # Allow Postgres Port 5432 ONLY from ECS Security Group
