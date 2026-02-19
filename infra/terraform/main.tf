@@ -29,5 +29,5 @@ module "ecs" {
   rds_dependency = module.rds.db_id # Use db_id instead of full module
 
   # FARGATE REQUIRED variables
-  ecs_execution_role_arn = "arn:aws:iam::019138829474:role/ecsTaskExecutionRole"
+  ecs_execution_role_arn = "arn:aws:iam::811738710312:role/ecs_fargate_taskRole"
 }

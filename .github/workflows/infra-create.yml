@@ -1,6 +1,9 @@
 name: Infrastructure Create
 
 on:
+  push:
+      branches: [main]
+      paths: ['infra/**']
   workflow_dispatch: # Manual trigger
 
 env:

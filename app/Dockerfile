@@ -7,6 +7,7 @@ RUN npm install --frozen-lockfile
 COPY . .
 RUN npm run build
 RUN npm prune --omit=dev && npm cache clean --force
+
 # ---------- Stage 2: Runtime ----------
 FROM node:20-alpine
 RUN apk add --no-cache vips

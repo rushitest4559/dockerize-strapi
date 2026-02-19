@@ -23,7 +23,7 @@ terraform {
   # Remote Backend
   ############################################
   backend "s3" {
-    bucket  = "rushikesh-strapi-terraform-state"
+    bucket  = "rushikesh-strapi-terraform-tfstate"
     key     = "strapi/terraform.tfstate"
     region  = "us-east-1"
     encrypt = true
