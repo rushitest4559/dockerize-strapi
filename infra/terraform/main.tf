@@ -1,6 +1,6 @@
 module "security_group" {
   source       = "../modules/security-group"
-  vpc_id       = "vpc-00dc8e01b3aa79cf2" # Default VPC ID from console
+  vpc_id       = "vpc-0b5c422c6de590c86" # Default VPC ID from console
   project_name = var.project_name
 }
 
@@ -8,7 +8,7 @@ module "rds" {
   source             = "../modules/rds"
   project_name       = var.project_name
   single_az          = "us-east-1b"
-  private_subnet_ids = ["subnet-03c103d71f50f4961", "subnet-0c0286138c0ed85dc"] # Default private subnets
+  private_subnet_ids = ["subnet-0402e41a2030320e1", "subnet-023e7b0a4fff131df"] # Default private subnets
   rds_sg_id          = module.security_group.rds_sg_id
   db_password        = var.db_password
 }
@@ -17,7 +17,7 @@ module "ecs" {
   source = "../modules/ecs"
 
   project_name      = var.project_name
-  public_subnet_id  = "subnet-03c103d71f50f4961"      # Default public subnet
+  public_subnet_id  = "subnet-0402e41a2030320e1"      # Default public subnet
   ecs_fargate_sg_id = module.security_group.ecs_sg_id # Updated name
   ecr_image_url     = var.ecr_image_url
 
