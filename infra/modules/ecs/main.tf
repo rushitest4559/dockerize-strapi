@@ -1,65 +1,4 @@
-# 0. CloudWatch Log Group (unchanged)
-resource "aws_cloudwatch_log_group" "ecs_logs" {
-  name              = "/ecs/${var.project_name}-cluster/${var.project_name}-service"
-  retention_in_days = 7
 
-  tags = {
-    Name = "${var.project_name}-ecs-logs"
-  }
-}
-
-# 0a. CloudWatch Dashboard for ECS Metrics
-resource "aws_cloudwatch_dashboard" "ecs_metrics" {
-  dashboard_name = "${var.project_name}-ecs-metrics"
-  
-  dashboard_body = jsonencode({
-    widgets = [
-      {
-        type  = "metric"
-        properties = {
-          metrics = [
-            ["AWS/ECS", "CPUUtilization", "ClusterName", aws_ecs_cluster.main.name, "ServiceName", aws_ecs_service.main.name],
-            [".", "MemoryUtilization", ".", ".", ".", "."]
-          ]
-          period            = 300
-          stat              = "Average"
-          region            = "us-east-1"
-          title             = "CPU & Memory Utilization"
-          view              = "timeSeries"
-        }
-      },
-      {
-        type  = "metric"
-        properties = {
-          metrics = [
-            [ "AWS/ECS", "RunningTaskCount", "ClusterName", aws_ecs_cluster.main.name, "ServiceName", aws_ecs_service.main.name ],
-            [ "....", "PendingTaskCount", ".", ".", ".", "." ]
-          ]
-          period            = 300
-          stat              = "Average"
-          region            = "us-east-1"
-          title             = "Task Count"
-          view              = "timeSeries"
-        }
-      },
-      {
-        type  = "metric"
-        properties = {
-          metrics = [
-            ["AWS/ECS", "NetworkRxBytes", "ClusterName", aws_ecs_cluster.main.name, "ServiceName", aws_ecs_service.main.name],
-            ["...", "NetworkTxBytes", ".", ".", ".", "."]
-          ]
-          period            = 300
-          stat              = "Average"
-          region            = "us-east-1"
-          title             = "Network In/Out (bytes/sec)"
-          view              = "timeSeries"
-          unit              = "Bits/Second"
-        }
-      }
-    ]
-  })
-}
 
 # 1. ECS Cluster - Container Insights enabled
 resource "aws_ecs_cluster" "main" {
@@ -113,15 +52,6 @@ resource "aws_ecs_task_definition" "strapi" {
         { name = "TRANSFER_TOKEN_SALT", value = "testTransfer" },
         { name = "JWT_SECRET", value = "anotherTestSecret" }
       ]
-
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          "awslogs-group"         = aws_cloudwatch_log_group.ecs_logs.name
-          "awslogs-region"        = "us-east-1"
-          "awslogs-stream-prefix" = "ecs"
-        }
-      }
     }
   ])
 }
