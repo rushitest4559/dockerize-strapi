@@ -48,5 +48,5 @@ module "ecs" {
   private_subnet_ids     = module.networking.private_subnet_ids
   ecs_fargate_sg_id      = module.security_group.ecs_sg_id
   blue_tg_arn            = module.load-balancer.blue_tg_arn
-  db_endpoint            = module.rds.db_endpoint
+  db_endpoint            = module.rds.db_address
 }
