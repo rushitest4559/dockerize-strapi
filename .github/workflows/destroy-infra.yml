@@ -31,7 +31,10 @@ jobs:
       working-directory: ${{ env.WORKING_DIR }}
 
     - name: Terraform Destroy
-      run: terraform destroy -auto-approve
+      run: |
+        terraform destroy -auto-approve \
+          -var="aws_account_id=${{ secrets.AWS_ACCOUNT_ID }}" \
+          -var="ecs_execution_role_arn=${{ secrets.ECS_EXECUTION_ROLE_ARN }}"
       working-directory: ${{ env.WORKING_DIR }}
 
     - name: Destroy ECR Repo
