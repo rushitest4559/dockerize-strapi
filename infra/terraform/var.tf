@@ -7,10 +7,6 @@ variable "aws_account_id" {
   type = string
 }
 
-variable "ecr_image_url" {
-  default = "${var.aws_account_id}.dkr.ecr.us-east-1.amazonaws.com/rushikesh-strapi:latest"
-}
-
 variable "db_password" {
   description = "The password for the RDS instance"
   type        = string

@@ -42,7 +42,7 @@ module "ecs" {
   project_name = var.project_name
   ecs_execution_role_arn = var.ecs_execution_role_arn
   strapi_env_vars = var.strapi_env_vars
-  ecr_image_url = var.ecr_image_url
+  ecr_image_url = "${var.aws_account_id}.dkr.ecr.us-east-1.amazonaws.com/rushikesh-strapi:latest"
   private_subnet_ids = module.networking.private_subnet_ids
   ecs_fargate_sg_id = module.security_group.ecs_fargate_sg_id
   blue_tg_arn = module.load-balancer.blue_tg_arn
