@@ -7,10 +7,14 @@ variable "aws_account_id" {
   type = string
 }
 
-variable "db_password" {
-  description = "The password for the RDS instance"
-  type        = string
-  default     = "strapi_secure_password"
+variable "db_vars" {
+  type = map(string)
+  default = {
+    "db_name"     = "strapi",
+    "db_username" = "strapi",
+    "db_password" = "strapi_secure_password",
+    "single_az"   = "us-east-1e"
+  }
 }
 
 variable "strapi_env_vars" {

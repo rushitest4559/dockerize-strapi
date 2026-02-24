@@ -12,21 +12,6 @@ variable "rds_sg_id" {
   description = "The Security Group ID for the RDS instance"
 }
 
-variable "db_name" {
-  type    = string
-  default = "strapi"
-}
-
-variable "db_username" {
-  type    = string
-  default = "strapi"
-}
-
-variable "db_password" {
-  type      = string
-  sensitive = true
-}
-
-variable "single_az" {
-  default = "us-east-1e"
+variable "db_vars" {
+  type = map(string)
 }

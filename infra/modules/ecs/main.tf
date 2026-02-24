@@ -23,6 +23,25 @@ resource "aws_cloudwatch_log_group" "strapi" {
   retention_in_days = 7
 }
 
+locals {
+  strapi_env_vars = [
+    { name = "DATABASE_CLIENT", value = "postgres" },
+    { name = "DATABASE_HOST", value = var.db_endpoint },
+    { name = "DATABASE_PORT", value = "5432" },
+    { name = "DATABASE_NAME", value = var.db_vars["db_name"] },
+    { name = "DATABASE_USERNAME", value = var.db_vars["db_username"] },
+    { name = "DATABASE_PASSWORD", value = var.db_vars["db_password"] },
+    { name = "DATABASE_SSL", value = "true" },
+    { name = "DATABASE_SSL_REJECT_UNAUTHORIZED", value = "false" },
+    { name = "NODE_ENV", value = "production" },
+    { name = "APP_KEYS", value = "testKey1,testKey2" },
+    { name = "API_TOKEN_SALT", value = "testSalt" },
+    { name = "ADMIN_JWT_SECRET", value = "testSecret" },
+    { name = "TRANSFER_TOKEN_SALT", value = "testTransfer" },
+    { name = "JWT_SECRET", value = "anotherTestSecret" }
+  ]
+}
+
 ####################################
 # 3. Task Definition (With Monitoring)
 # We can view task as instance (VM) and containers as application running on it. one task can have multiple containers. Here we have only one container in task definition.
@@ -41,7 +60,7 @@ resource "aws_ecs_task_definition" "strapi" {
       image        = var.ecr_image_url
       essential    = true
       portMappings = [{ containerPort = 1337 }]
-      environment  = var.strapi_env_vars
+      environment  = locals.strapi_env_vars
       
       logConfiguration = {
         logDriver = "awslogs"

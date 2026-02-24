@@ -34,11 +34,10 @@ variable "blue_tg_arn" {
   description = "ARN of the Blue (production) target group"
 }
 
-# Consolidated professional environment variables
-variable "strapi_env_vars" {
-  type = list(object({
-    name  = string
-    value = string
-  }))
-  description = "List of environment variables for the Strapi container"
+variable "db_vars" {
+  type = map(string)
+}
+
+variable "db_endpoint" {
+  type = string
 }
