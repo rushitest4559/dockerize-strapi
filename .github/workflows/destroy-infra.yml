@@ -3,7 +3,7 @@ name: Infrastructure Destroy
 on:
   schedule:
     - cron: '30 12 * * *'  # 6 PM IST daily (12:30 UTC)
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:
 
 env:
   AWS_REGION: us-east-1
@@ -23,21 +23,6 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
-    # Destroy non-Terraform resources FIRST
-    - name: Destroy S3 Bucket
-      run: |
-        aws s3api delete-objects \
-          --bucket rushikesh-strapi-terraform-tfstate \
-          --delete-objects "$(aws s3api list-object-versions \
-            --bucket rushikesh-strapi-terraform-tfstate \
-            --query '{Objects: Versions[].{Key:Key,VersionId:VersionId} + DeleteMarkers[].{Key:Key,VersionId:VersionId}}')"
-        aws s3api delete-bucket --bucket rushikesh-strapi-terraform-tfstate || true
-
-    - name: Destroy ECR Repo
-      run: |
-        aws ecr delete-repository --repository-name rushikesh-strapi --force || true
-
-    # Terraform destroy LAST
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
 
@@ -48,3 +33,18 @@ jobs:
     - name: Terraform Destroy
       run: terraform destroy -auto-approve
       working-directory: ${{ env.WORKING_DIR }}
+
+    - name: Destroy ECR Repo
+      run: |
+        aws ecr delete-repository --repository-name rushikesh-strapi --force || true
+
+    - name: Destroy S3 Bucket (TF State) - FIXED
+      run: |
+        # Method 1: Simple force delete (handles versions automatically)
+        aws s3 rb s3://rushikesh-strapi-terraform-tfstate --force || true
+        
+        # Fallback: Manual cleanup if rb fails
+        aws s3 rm s3://rushikesh-strapi-terraform-tfstate --recursive --force || true
+        aws s3api delete-bucket --bucket rushikesh-strapi-terraform-tfstate --force || true
+
+    
