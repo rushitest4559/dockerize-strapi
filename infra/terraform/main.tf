@@ -20,6 +20,7 @@ module "networking" {
   source = "../modules/networking"
   vpc_id = data.aws_vpc.default.id
   igw_id = data.aws_internet_gateway.default.id
+  vpce_sg_id = module.security_group.vpce_sg_id
 }
 
 module "load-balancer" {

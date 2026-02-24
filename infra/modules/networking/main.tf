@@ -53,7 +53,7 @@ resource "aws_vpc_endpoint" "interface_endpoints" {
   vpc_id              = var.vpc_id
   service_name        = "com.amazonaws.${var.region}.${each.value}"
   vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.endpoints_sg.id]
+  security_group_ids  = [var.vpce_sg_id]
   subnet_ids          = aws_subnet.private[*].id
   private_dns_enabled = true
 }

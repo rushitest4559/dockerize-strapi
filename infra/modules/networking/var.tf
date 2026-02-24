@@ -25,3 +25,7 @@ variable "vpc_id" {
 variable "igw_id" {
   type = string
 }
+
+variable "vpce_sg_id" {
+  type = string
+}
