@@ -5,14 +5,14 @@ from botocore.exceptions import ClientError
 s3 = boto3.client('s3', region_name='us-east-1')
 ecr = boto3.client('ecr', region_name='us-east-1')
 
-# S3 Bucket
+# S3 Bucket - FIXED: No LocationConstraint for us-east-1
 bucket_name = 'rushikesh-strapi-terraform-tfstate'
 try:
     s3.head_bucket(Bucket=bucket_name)
     print(f"✅ Bucket '{bucket_name}' already exists")
 except ClientError as e:
     if e.response['Error']['Code'] == '404':
-        s3.create_bucket(Bucket=bucket_name, CreateBucketConfiguration={'LocationConstraint': 'us-east-1'})
+        s3.create_bucket(Bucket=bucket_name)  # ✅ No LocationConstraint needed
         print(f"✅ Created bucket '{bucket_name}'")
     else:
         print(f"❌ Error checking bucket: {e}")
