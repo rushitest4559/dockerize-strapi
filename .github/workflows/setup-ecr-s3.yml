@@ -26,5 +26,8 @@ jobs:
       with:
         python-version: '3.11'
         
+    - name: Install boto3
+      run: pip install boto3
+      
     - name: Execute setup script
       run: python infra/terraform/setup_aws.py
