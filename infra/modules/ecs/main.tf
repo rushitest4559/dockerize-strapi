@@ -60,7 +60,7 @@ resource "aws_ecs_task_definition" "strapi" {
       image        = var.ecr_image_url
       essential    = true
       portMappings = [{ containerPort = 1337 }]
-      environment  = locals.strapi_env_vars
+      environment  = local.strapi_env_vars
       
       logConfiguration = {
         logDriver = "awslogs"
