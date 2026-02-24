@@ -35,14 +35,14 @@ terraform {
 # AWS Provider
 ############################################
 provider "aws" {
-  region = var.aws_region
+  region = "us-east-1"
 
-  # default_tags {
-  #   tags = {
-  #     Project     = "Strapi-Terraform-Assignment"
-  #     Environment = "dev"
-  #     ManagedBy   = "Terraform"
-  #     Owner       = "Rushi"
-  #   }
-  # }
+  default_tags {
+    tags = {
+      Project     = "Strapi-Terraform-Assignment"
+      Environment = "dev"
+      ManagedBy   = "Terraform"
+      Owner       = "Rushi"
+    }
+  }
 }

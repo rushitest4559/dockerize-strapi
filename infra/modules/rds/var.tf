@@ -28,5 +28,5 @@ variable "db_password" {
 }
 
 variable "single_az" {
-  
+  default = "us-east-1e"
 }

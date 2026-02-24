@@ -1,33 +1,49 @@
+
+# --- Get default vpc and igw id ---
+data "aws_vpc" "default" {
+  default = true
+}
+data "aws_internet_gateway" "default" {
+  filter {
+    name   = "attachment.vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+}
+
 module "security_group" {
   source       = "../modules/security-group"
-  vpc_id       = "vpc-0778ad9a2069279fc" # Default VPC ID from console
+  vpc_id       = data.aws_vpc.default.id
+  project_name = var.project_name
+}
+
+module "networking" {
+  source = "../modules/networking"
+  vpc_id = data.aws_vpc.default.id
+}
+
+module "load-balancer" {
+  source = "../modules/load-balancer"
+  public_subnet_ids = module.networking.public_subnet_ids
+  vpc_id = data.aws_vpc.default.id
+  alb_sg_id = module.security_group.alb_sg_id
   project_name = var.project_name
 }
 
 module "rds" {
   source             = "../modules/rds"
   project_name       = var.project_name
-  single_az          = "us-east-1b"
-  private_subnet_ids = ["subnet-0cc23dc8400d81bf3", "subnet-00efaeabe6a244f6f"] # Default private subnets
+  private_subnet_ids = module.networking.private_subnet_ids
   rds_sg_id          = module.security_group.rds_sg_id
   db_password        = var.db_password
 }
 
 module "ecs" {
   source = "../modules/ecs"
-
-  project_name      = var.project_name
-  public_subnet_id  = "subnet-0cc23dc8400d81bf3"      # Default public subnet
-  ecs_fargate_sg_id = module.security_group.ecs_sg_id # Updated name
-  ecr_image_url     = var.ecr_image_url
-
-  # RDS Connection Details
-  db_host        = module.rds.db_address
-  db_name        = module.rds.db_name
-  db_username    = "strapi"
-  db_password    = var.db_password
-  rds_dependency = module.rds.db_id # Use db_id instead of full module
-
-  # FARGATE REQUIRED variables
-  ecs_execution_role_arn = "arn:aws:iam::811738710312:role/ecs_fargate_taskRole"
+  project_name = var.project_name
+  ecs_execution_role_arn = var.ecs_execution_role_arn
+  strapi_env_vars = var.strapi_env_vars
+  ecr_image_url = var.ecr_image_url
+  private_subnet_ids = module.networking.private_subnet_ids
+  ecs_fargate_sg_id = module.security_group.ecs_fargate_sg_id
+  blue_tg_arn = module.load-balancer.blue_tg_arn
 }

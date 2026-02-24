@@ -1,0 +1,50 @@
+name: Infrastructure Destroy
+
+on:
+  schedule:
+    - cron: '30 12 * * *'  # 6 PM IST daily (12:30 UTC)
+  workflow_dispatch:  # Manual trigger
+
+env:
+  AWS_REGION: us-east-1
+  WORKING_DIR: ./infra/terraform
+
+jobs:
+  destroy-all:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    # Destroy non-Terraform resources FIRST
+    - name: Destroy S3 Bucket
+      run: |
+        aws s3api delete-objects \
+          --bucket rushikesh-strapi-terraform-tfstate \
+          --delete-objects "$(aws s3api list-object-versions \
+            --bucket rushikesh-strapi-terraform-tfstate \
+            --query '{Objects: Versions[].{Key:Key,VersionId:VersionId} + DeleteMarkers[].{Key:Key,VersionId:VersionId}}')"
+        aws s3api delete-bucket --bucket rushikesh-strapi-terraform-tfstate || true
+
+    - name: Destroy ECR Repo
+      run: |
+        aws ecr delete-repository --repository-name rushikesh-strapi --force || true
+
+    # Terraform destroy LAST
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    - name: Terraform Init
+      run: terraform init
+      working-directory: ${{ env.WORKING_DIR }}
+
+    - name: Terraform Destroy
+      run: terraform destroy -auto-approve
+      working-directory: ${{ env.WORKING_DIR }}

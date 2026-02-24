@@ -8,7 +8,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  WORKING_DIR: ./infra/terraform # Adjust this to your actual terraform folder path
+  WORKING_DIR: ./infra/terraform 
 
 jobs:
   terraform-apply:
